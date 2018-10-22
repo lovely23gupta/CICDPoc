@@ -12,7 +12,7 @@ jobs:
       install:
       - npm install newman
       script:
-#      - echo "Start building the source code" 
+#      - echo "Start building the source code now" 
 #      - bash BackendServiceImpl/build.sh || travis_terminate 1; 
 #      - echo "Start deploying the backend service to WSO2 Integration Cloud Dev Tenant" 
 #      - bash DeployBackendService/deploy.sh Dev || travis_terminate 1;
