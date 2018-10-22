@@ -1,406 +1,811 @@
 {
+
 	"info": {
+
 		"_postman_id": "c03c827e-6f8e-4315-966a-626fb801df5f",
+
 		"name": "WSO2_API_PUBLISHER",
+
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+
 	},
+
 	"item": [
+
 		{
+
 			"name": "Dynamic Client Registration",
+
 			"event": [
+
 				{
+
 					"listen": "prerequest",
+
 					"script": {
+
 						"id": "88facc10-bf99-4069-be50-b5489e737a18",
+
 						"exec": [
+
 							"var base64Key = btoa(postman.getEnvironmentVariable(\"username\") + ':' + postman.getEnvironmentVariable(\"password\"));",
+
 							"postman.setEnvironmentVariable(\"base64Key\", base64Key);"
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				},
+
 				{
+
 					"listen": "test",
+
 					"script": {
+
 						"id": "9eb0d465-a0a4-439b-961f-7d66b9bf038d",
+
 						"exec": [
+
 							"var jsonData = JSON.parse(responseBody);",
+
 							"var base64CICS = btoa(jsonData.clientId + ':' + jsonData.clientSecret);",
+
 							"",
+
 							"console.log(\"CI : \" + jsonData.clientId);",
+
 							"console.log(\"CS : \" + jsonData.clientSecret);",
+
 							"",
+
 							"",
+
 							"postman.setEnvironmentVariable(\"base64CICS\", base64CICS);",
+
 							"",
+
 							"console.log(base64CICS)"
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				}
+
 			],
+
 			"request": {
+
 				"method": "POST",
+
 				"header": [
+
 					{
+
 						"key": "Content-Type",
+
 						"value": "application/json"
+
 					},
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Basic {{base64Key}}"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "raw",
+
 					"raw": "{\n    \"callbackUrl\": \"www.google.lk\",\n    \"clientName\": \"rest_api_publisher\",\n    \"tokenScope\": \"Production\",\n    \"owner\": \"admin\",\n    \"grantType\": \"password refresh_token\",\n    \"saasApp\": true\n}"
+
 				},
+
 				"url": {
+
 					"raw": "{{serverURL}}/client-registration/v0.14/register",
+
 					"host": [
+
 						"{{serverURL}}"
+
 					],
+
 					"path": [
+
 						"client-registration",
+
 						"v0.14",
+
 						"register"
+
 					]
+
 				}
+
 			},
+
 			"response": []
+
 		},
+
 		{
+
 			"name": "Get Access Token",
+
 			"event": [
+
 				{
+
 					"listen": "test",
+
 					"script": {
+
 						"id": "39583d48-8c64-4bff-b176-e04d816e9fb3",
+
 						"exec": [
+
 							"var jsonData = JSON.parse(responseBody);",
+
 							"postman.setEnvironmentVariable(\"access_token\", jsonData.access_token);",
+
 							""
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				}
+
 			],
+
 			"request": {
+
 				"method": "POST",
+
 				"header": [
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Basic {{base64CICS}}"
+
 					},
+
 					{
+
 						"key": "Content-Type",
+
 						"value": "application/x-www-form-urlencoded"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "urlencoded",
+
 					"urlencoded": [
+
 						{
+
 							"key": "scope",
+
 							"value": "apim:api_view apim:api_create apim:api_publish",
+
 							"type": "text"
+
 						},
+
 						{
+
 							"key": "grant_type",
+
 							"value": "password",
+
 							"type": "text"
+
 						},
+
 						{
+
 							"key": "username",
+
 							"value": "{{username}}",
+
 							"type": "text"
+
 						},
+
 						{
+
 							"key": "password",
+
 							"value": "{{password}}",
+
 							"type": "text"
+
 						}
+
 					]
+
 				},
+
 				"url": {
+
 					"raw": "{{gatewayURL}}/token",
+
 					"host": [
+
 						"{{gatewayURL}}"
+
 					],
+
 					"path": [
+
 						"token"
+
 					]
+
 				}
+
 			},
+
 			"response": []
+
 		},
+
 		{
+
 			"name": "Get Existing API",
+
 			"event": [
+
 				{
+
 					"listen": "test",
+
 					"script": {
+
 						"id": "0f741247-db9d-4174-956b-5499fc063cac",
+
 						"exec": [
+
 							"var jsonData = JSON.parse(responseBody);",
+
 							"if (jsonData.count >= 1) {",
+
 							"   postman.setNextRequest(\"Update API\");",
+
 							"   ",
+
 							"   postman.setEnvironmentVariable(\"apiStatus\", jsonData.list[0].status); ",
+
 							"   postman.setEnvironmentVariable(\"apiId\", jsonData.list[0].id);",
+
 							"",
+
 							"  ",
+
 							"}",
+
 							"",
+
 							"",
+
 							"",
+
 							"",
+
 							"",
+
 							""
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				}
+
 			],
+
 			"request": {
+
 				"method": "GET",
+
 				"header": [
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Bearer {{access_token}}"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "raw",
+
 					"raw": ""
+
 				},
+
 				"url": {
+
 					"raw": "{{serverURL}}/api/am/publisher/v0.14/apis?query=name:{{apiName}}",
+
 					"host": [
+
 						"{{serverURL}}"
+
 					],
+
 					"path": [
+
 						"api",
+
 						"am",
+
 						"publisher",
+
 						"v0.14",
+
 						"apis"
+
 					],
+
 					"query": [
+
 						{
+
 							"key": "query",
+
 							"value": "name:{{apiName}}"
+
 						}
+
 					]
+
 				}
+
 			},
+
 			"response": []
+
 		},
+
 		{
+
 			"name": "Create an API",
+
 			"event": [
+
 				{
+
 					"listen": "test",
+
 					"script": {
+
 						"id": "4c3c1bc8-ae84-4e74-aa3e-568254581894",
+
 						"exec": [
+
 							"var jsonData = JSON.parse(responseBody);",
+
 							"postman.setEnvironmentVariable(\"apiId\", jsonData.id);",
+
 							"",
+
 							"postman.setNextRequest(\"Update swagger definition\");",
+
 							""
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				}
+
 			],
+
 			"request": {
+
 				"method": "POST",
+
 				"header": [
+
 					{
+
 						"key": "Content-Type",
+
 						"value": "application/json"
+
 					},
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Bearer {{access_token}}"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "raw",
-					"raw": "{\r\n\t\"id\": \"7a2298c4-c905-403f-8fac-38c73401631f\",\r\n   \"name\": \"{{apiName}}\",\r\n   \"description\": \"{{apiName}}\",\r\n   \"context\": \"\/{{apiContext}}\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"{{username}}\", \"sequences\": [ {\"name\": \"disableChunking_Shared\", \"type\": \"in\"} ], \r\n   \"apiDefinition\":\"{\\r\\n  \\\"paths\\\": {\\r\\n    \\\"\\\/*\\\": {\\r\\n      \\\"get\\\": {\\r\\n        \\\"x-auth-type\\\": \\\"Application\\\",\\r\\n        \\\"x-throttling-tier\\\": \\\"Unlimited\\\",\\r\\n        \\\"responses\\\": {\\r\\n          \\\"200\\\": {\\r\\n            \\\"description\\\": \\\"OK\\\"\\r\\n          }\\r\\n        }\\r\\n      }\\r\\n    }\\r\\n  },\\r\\n  \\\"x-wso2-security\\\": {\\r\\n    \\\"apim\\\": {\\r\\n      \\\"x-wso2-scopes\\\": []\\r\\n    }\\r\\n  },\\r\\n  \\\"swagger\\\": \\\"2.0\\\",\\r\\n  \\\"info\\\": {\\r\\n    \\\"title\\\": \\\"Sample\\\",\\r\\n    \\\"description\\\": \\\"Verify a phone number\\\",\\r\\n    \\\"contact\\\": {\\r\\n      \\\"email\\\": \\\"xx@ee.com\\\",\\r\\n      \\\"name\\\": \\\"xx\\\"\\r\\n    },\\r\\n    \\\"version\\\": \\\"1.0.0\\\"\\r\\n  }\\r\\n}\",\r\n   \"wsdlUri\": null,\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"type\": \"HTTP\",\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"foo\"],\r\n   \"tiers\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"thumbnailUri\": null,\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"{{username}}\",\r\n      \"technicalOwnerEmail\": \"{{username}}\",\r\n      \"technicalOwner\": \"{{username}}\",\r\n      \"businessOwner\": \"{{username}}\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}\r\n"
+
+					"raw": "{\n\t\"id\": \"7a2298c4-c905-403f-8fac-38c73401631f\",\n   \"name\": \"{{apiName}}\",\n   \"description\": \"{{apiName}}\",\n   \"context\": \"/{{apiContext}}\",\n   \"version\": \"1.0.0\",\n   \"provider\": \"{{username}}\", \"sequences\": [ {\"name\": \"disableChunking_Shared\", \"type\": \"in\"} ], \n   \"apiDefinition\":\"{\\r\\n  \\\"paths\\\": {\\r\\n    \\\"\\\/*\\\": {\\r\\n      \\\"get\\\": {\\r\\n        \\\"x-auth-type\\\": \\\"Application\\\",\\r\\n        \\\"x-throttling-tier\\\": \\\"Unlimited\\\",\\r\\n        \\\"responses\\\": {\\r\\n          \\\"200\\\": {\\r\\n            \\\"description\\\": \\\"OK\\\"\\r\\n          }\\r\\n        }\\r\\n      }\\r\\n    }\\r\\n  },\\r\\n  \\\"x-wso2-security\\\": {\\r\\n    \\\"apim\\\": {\\r\\n      \\\"x-wso2-scopes\\\": []\\r\\n    }\\r\\n  },\\r\\n  \\\"swagger\\\": \\\"2.0\\\",\\r\\n  \\\"info\\\": {\\r\\n    \\\"title\\\": \\\"Sample\\\",\\r\\n    \\\"description\\\": \\\"Verify a phone number\\\",\\r\\n    \\\"contact\\\": {\\r\\n      \\\"email\\\": \\\"xx@ee.com\\\",\\r\\n      \\\"name\\\": \\\"xx\\\"\\r\\n    },\\r\\n    \\\"version\\\": \\\"1.0.0\\\"\\r\\n  }\\r\\n}\",\n   \"wsdlUri\": null,\n   \"responseCaching\": \"Disabled\",\n   \"cacheTimeout\": 300,\n   \"destinationStatsEnabled\": null,\n   \"isDefaultVersion\": false,\n   \"type\": \"HTTP\",\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\": [\"foo\"],\n   \"tiers\": [\"Unlimited\"],\n   \"maxTps\":    {\n      \"sandbox\": 5000,\n      \"production\": 1000\n   },\n   \"thumbnailUri\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"businessInformation\":    {\n      \"businessOwnerEmail\": \"{{username}}\",\n      \"technicalOwnerEmail\": \"{{username}}\",\n      \"technicalOwner\": \"{{username}}\",\n      \"businessOwner\": \"{{username}}\"\n   },\n   \"corsConfiguration\":    {\n      \"accessControlAllowOrigins\": [\"*\"],\n      \"accessControlAllowHeaders\":       [\n         \"authorization\",\n         \"Access-Control-Allow-Origin\",\n         \"Content-Type\",\n         \"SOAPAction\"\n      ],\n      \"accessControlAllowMethods\":       [\n         \"GET\",\n         \"PUT\",\n         \"POST\",\n         \"DELETE\",\n         \"PATCH\",\n         \"OPTIONS\"\n      ],\n      \"accessControlAllowCredentials\": false,\n      \"corsConfigurationEnabled\": false\n   }\n}\n"
+
 				},
+
 				"url": {
+
 					"raw": "{{serverURL}}/api/am/publisher/v0.14/apis",
+
 					"host": [
+
 						"{{serverURL}}"
+
 					],
+
 					"path": [
+
 						"api",
+
 						"am",
+
 						"publisher",
+
 						"v0.14",
+
 						"apis"
+
 					]
+
 				}
+
 			},
+
 			"response": []
+
 		},
+
 		{
+
 			"name": "Update API",
+
 			"event": [
+
 				{
+
 					"listen": "test",
+
 					"script": {
+
 						"id": "4c3c1bc8-ae84-4e74-aa3e-568254581894",
+
 						"exec": [
+
 							"var jsonData = JSON.parse(responseBody);",
+
 							""
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				}
+
 			],
+
 			"request": {
+
 				"method": "PUT",
+
 				"header": [
+
 					{
+
 						"key": "Content-Type",
+
 						"value": "application/json"
+
 					},
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Bearer {{access_token}}"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "raw",
-					"raw": "{\r\n\t\"id\": \"7a2298c4-c905-403f-8fac-38c73401631f\",\r\n   \"name\": \"{{apiName}}\",\r\n   \"description\": \"{{apiName}}\",\r\n   \"context\": \"\/{{apiContext}}\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"{{username}}\", \"sequences\": [ {\"name\": \"disableChunking_Shared\", \"type\": \"in\"} ], \r\n   \"apiDefinition\":\"{\\r\\n  \\\"paths\\\": {\\r\\n    \\\"\\\/*\\\": {\\r\\n      \\\"get\\\": {\\r\\n        \\\"x-auth-type\\\": \\\"Application\\\",\\r\\n        \\\"x-throttling-tier\\\": \\\"Unlimited\\\",\\r\\n        \\\"responses\\\": {\\r\\n          \\\"200\\\": {\\r\\n            \\\"description\\\": \\\"OK\\\"\\r\\n          }\\r\\n        }\\r\\n      }\\r\\n    }\\r\\n  },\\r\\n  \\\"x-wso2-security\\\": {\\r\\n    \\\"apim\\\": {\\r\\n      \\\"x-wso2-scopes\\\": []\\r\\n    }\\r\\n  },\\r\\n  \\\"swagger\\\": \\\"2.0\\\",\\r\\n  \\\"info\\\": {\\r\\n    \\\"title\\\": \\\"Sample\\\",\\r\\n    \\\"description\\\": \\\"Verify a phone number\\\",\\r\\n    \\\"contact\\\": {\\r\\n      \\\"email\\\": \\\"xx@ee.com\\\",\\r\\n      \\\"name\\\": \\\"xx\\\"\\r\\n    },\\r\\n    \\\"version\\\": \\\"1.0.0\\\"\\r\\n  }\\r\\n}\",\r\n   \"wsdlUri\": null,\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"type\": \"HTTP\",\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"foo\"],\r\n   \"tiers\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"thumbnailUri\": null,\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"{{username}}\",\r\n      \"technicalOwnerEmail\": \"{{username}}\",\r\n      \"technicalOwner\": \"{{username}}\",\r\n      \"businessOwner\": \"{{username}}\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}\r\n"
+
+					"raw": "{\n\t\"id\": \"7a2298c4-c905-403f-8fac-38c73401631f\",\n   \"name\": \"{{apiName}}\",\n   \"description\": \"{{apiName}}\",\n   \"context\": \"/{{apiContext}}\",\n   \"version\": \"1.0.0\",\n   \"provider\": \"{{username}}\",  \"sequences\": [ {\"name\": \"disableChunking_Shared\", \"type\": \"in\"} ],  \n   \"apiDefinition\":\"{\\r\\n  \\\"paths\\\": {\\r\\n    \\\"\\\/*\\\": {\\r\\n      \\\"get\\\": {\\r\\n        \\\"x-auth-type\\\": \\\"Application\\\",\\r\\n        \\\"x-throttling-tier\\\": \\\"Unlimited\\\",\\r\\n        \\\"responses\\\": {\\r\\n          \\\"200\\\": {\\r\\n            \\\"description\\\": \\\"OK\\\"\\r\\n          }\\r\\n        }\\r\\n      }\\r\\n    }\\r\\n  },\\r\\n  \\\"x-wso2-security\\\": {\\r\\n    \\\"apim\\\": {\\r\\n      \\\"x-wso2-scopes\\\": []\\r\\n    }\\r\\n  },\\r\\n  \\\"swagger\\\": \\\"2.0\\\",\\r\\n  \\\"info\\\": {\\r\\n    \\\"title\\\": \\\"Sample\\\",\\r\\n    \\\"description\\\": \\\"Verify a phone number\\\",\\r\\n    \\\"contact\\\": {\\r\\n      \\\"email\\\": \\\"xx@ee.com\\\",\\r\\n      \\\"name\\\": \\\"xx\\\"\\r\\n    },\\r\\n    \\\"version\\\": \\\"1.0.0\\\"\\r\\n  }\\r\\n}\",\n   \"wsdlUri\": null,\n   \"responseCaching\": \"Disabled\",\n   \"cacheTimeout\": 300,\n   \"destinationStatsEnabled\": null,\n   \"isDefaultVersion\": false,\n   \"type\": \"HTTP\",\n   \"transport\":    [\n      \"http\",\n      \"https\"\n   ],\n   \"tags\": [\"foo\"],\n   \"tiers\": [\"Unlimited\"],\n   \"maxTps\":    {\n      \"sandbox\": 5000,\n      \"production\": 1000\n   },\n   \"thumbnailUri\": null,\n   \"visibility\": \"PUBLIC\",\n   \"visibleRoles\": [],\n   \"visibleTenants\": [],\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"{{backendAPIEndpoint}}\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\n   \"gatewayEnvironments\": \"Production and Sandbox\",\n   \"subscriptionAvailability\": null,\n   \"subscriptionAvailableTenants\": [],\n   \"businessInformation\":    {\n      \"businessOwnerEmail\": \"{{username}}\",\n      \"technicalOwnerEmail\": \"{{username}}\",\n      \"technicalOwner\": \"{{username}}\",\n      \"businessOwner\": \"{{username}}\"\n   },\n   \"corsConfiguration\":    {\n      \"accessControlAllowOrigins\": [\"*\"],\n      \"accessControlAllowHeaders\":       [\n         \"authorization\",\n         \"Access-Control-Allow-Origin\",\n         \"Content-Type\",\n         \"SOAPAction\"\n      ],\n      \"accessControlAllowMethods\":       [\n         \"GET\",\n         \"PUT\",\n         \"POST\",\n         \"DELETE\",\n         \"PATCH\",\n         \"OPTIONS\"\n      ],\n      \"accessControlAllowCredentials\": false,\n      \"corsConfigurationEnabled\": false\n   }\n}\n"
+
 				},
+
 				"url": {
+
 					"raw": "{{serverURL}}/api/am/publisher/v0.14/apis/{{apiId}}",
+
 					"host": [
+
 						"{{serverURL}}"
+
 					],
+
 					"path": [
+
 						"api",
+
 						"am",
+
 						"publisher",
+
 						"v0.14",
+
 						"apis",
+
 						"{{apiId}}"
+
 					]
+
 				}
+
 			},
+
 			"response": []
+
 		},
+
 		{
+
 			"name": "Update swagger definition",
+
 			"event": [
+
 				{
+
 					"listen": "test",
+
 					"script": {
+
 						"id": "d0e86ecd-475d-4b9f-8fb7-3364a6bf1630",
+
 						"exec": [
+
 							"if (postman.getEnvironmentVariable(\"apiStatus\") === \"PUBLISHED\") {",
+
 							"   postman.setNextRequest(null);",
+
 							"  ",
+
 							"}",
+
 							""
+
 						],
+
 						"type": "text/javascript"
+
 					}
+
 				}
+
 			],
+
 			"request": {
+
 				"method": "PUT",
+
 				"header": [
+
 					{
+
 						"key": "Accept",
+
 						"value": "application/json"
+
 					},
+
 					{
+
 						"key": "Content-Type",
+
 						"value": "multipart/form-data"
+
 					},
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Bearer {{access_token}}"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "formdata",
+
 					"formdata": [
+
 						{
+
 							"key": "apiDefinition",
+
 							"type": "file",
+
 							"src": "DeployAPI/swagger.json"
+
 						}
+
 					]
+
 				},
+
 				"url": {
+
 					"raw": "{{serverURL}}/api/am/publisher/v0.14/apis/{{apiId}}/swagger",
+
 					"host": [
+
 						"{{serverURL}}"
+
 					],
+
 					"path": [
+
 						"api",
+
 						"am",
+
 						"publisher",
+
 						"v0.14",
+
 						"apis",
+
 						"{{apiId}}",
+
 						"swagger"
+
 					]
+
 				},
+
 				"description": "This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.\n"
+
 			},
+
 			"response": []
+
 		},
+
 		{
+
 			"name": "Change Life Cycle",
+
 			"request": {
+
 				"method": "POST",
+
 				"header": [
+
 					{
+
 						"key": "Authorization",
+
 						"value": "Bearer {{access_token}}"
+
 					},
+
 					{
+
 						"key": "Content-Type",
+
 						"value": "application/json"
+
 					}
+
 				],
+
 				"body": {
+
 					"mode": "raw",
+
 					"raw": ""
+
 				},
+
 				"url": {
+
 					"raw": "{{serverURL}}/api/am/publisher/v0.14/apis/change-lifecycle?action=Publish&apiId={{apiId}}",
+
 					"host": [
+
 						"{{serverURL}}"
+
 					],
+
 					"path": [
+
 						"api",
+
 						"am",
+
 						"publisher",
+
 						"v0.14",
+
 						"apis",
+
 						"change-lifecycle"
+
 					],
+
 					"query": [
+
 						{
+
 							"key": "action",
+
 							"value": "Publish"
+
 						},
+
 						{
+
 							"key": "apiId",
+
 							"value": "{{apiId}}"
+
 						}
+
 					]
+
 				}
+
 			},
+
 			"response": []
+
 		}
+
 	]
+
 }
