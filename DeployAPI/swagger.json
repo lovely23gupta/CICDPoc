@@ -18,7 +18,7 @@
         ],
         "x-auth-type": "None",
         "x-throttling-tier": "Unlimited",
-        "summary": "to display the site id and the display name of the site"
+        "summary": "to display the site id and the display of the site"
       }
     }
   },
