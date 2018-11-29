@@ -1,1 +1,55 @@
-{"swagger":"2.0","paths":{"/Citrix/Monitor/OData/v4/data":{"get":{"responses":{"200":{"description":""}},"parameters":[{"name":"customer","in":"header","required":true,"type":"string"},{"name":"clientId","in":"header","required":true,"type":"string"},{"name":"clientSecret","in":"header","required":true,"type":"string"}],"x-auth-type":"None","x-throttling-tier":"Unlimited"}}},"info":{"title":"odata_api","version":"v1.0"},"host":"ec2-18-234-202-70.compute-1.amazonaws.com:8243","basePath":"/odata/v1.0","schemes":["https","http"],"securityDefinitions":{"default":{"type":"oauth2","authorizationUrl":"https://ec2-18-234-202-70.compute-1.amazonaws.com:8243/authorize","flow":"implicit","scopes":{}}}}
+{
+  "swagger": "2.0",
+  "paths": {
+    "/Citrix/Monitor/OData/v4/data": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "parameters": [
+          {
+            "name": "customer",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "clientId",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "clientSecret",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "x-auth-type": "None",
+        "x-throttling-tier": "Unlimited",
+		"summary": "In order to display the odata response"
+      }
+    }
+  },
+  "info": {
+    "title": "odata_api",
+    "version": "v1.0"
+  },
+  "host": "ec2-18-234-202-70.compute-1.amazonaws.com:8243",
+  "basePath": "/odata/v1.0",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "securityDefinitions": {
+    "default": {
+      "type": "oauth2",
+      "authorizationUrl": "https://ec2-18-234-202-70.compute-1.amazonaws.com:8243/authorize",
+      "flow": "implicit",
+      "scopes": {}
+    }
+  }
+}
