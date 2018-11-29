@@ -30,7 +30,7 @@
         ],
         "x-auth-type": "None",
         "x-throttling-tier": "Unlimited",
-		"summary": "In order to display the odata response"
+		"summary": "In order to display the odata response from backend service"
       }
     }
   },
